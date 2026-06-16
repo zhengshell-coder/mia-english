@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Mia · 随时英语老师</title>
+<meta name="theme-color" content="#2F6B5E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mia">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body data-state="idle">
+
+<header id="topbar">
+  <button id="btnHistory" class="iconbtn" title="学习记录">📅</button>
+  <div class="who">
+    <div class="avatarWrap">
+      <svg id="avatar" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-label="Mia">
+        <defs>
+          <radialGradient id="abg" cx="50%" cy="38%" r="70%">
+            <stop offset="0%" stop-color="#DDF0E6"/>
+            <stop offset="100%" stop-color="#AED8C4"/>
+          </radialGradient>
+          <clipPath id="aclip"><circle cx="60" cy="60" r="58"/></clipPath>
+        </defs>
+        <circle cx="60" cy="60" r="58" fill="url(#abg)"/>
+        <g clip-path="url(#aclip)">
+          <!-- shirt -->
+          <path d="M20 122 C28 92 92 92 100 122 Z" fill="#2F6B5E"/>
+          <path d="M52 96 L60 106 L68 96 Z" fill="#F7F4EE"/>
+          <!-- hair -->
+          <circle cx="60" cy="50" r="36" fill="#5B4233"/>
+          <circle cx="90" cy="27" r="11" fill="#5B4233"/>
+          <circle cx="90" cy="27" r="4.5" fill="#6E523F"/>
+          <!-- face -->
+          <circle cx="60" cy="64" r="29" fill="#F8CFA8"/>
+          <path d="M33 56 C36 38 84 38 87 56 C76 48 44 48 33 56 Z" fill="#5B4233"/>
+          <!-- blush -->
+          <circle cx="42" cy="73" r="4.5" fill="#F2A48E" opacity="0.45"/>
+          <circle cx="78" cy="73" r="4.5" fill="#F2A48E" opacity="0.45"/>
+          <!-- brows -->
+          <path d="M42 53 Q48 50 53 53" stroke="#4A3528" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <path d="M67 53 Q72 50 78 53" stroke="#4A3528" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <!-- eyes -->
+          <g class="eyes">
+            <ellipse cx="48" cy="62" rx="3.1" ry="3.6" fill="#2D2A26"/>
+            <ellipse cx="72" cy="62" rx="3.1" ry="3.6" fill="#2D2A26"/>
+            <circle cx="49" cy="61" r="1" fill="#fff"/>
+            <circle cx="73" cy="61" r="1" fill="#fff"/>
+          </g>
+          <!-- glasses -->
+          <circle cx="48" cy="62" r="9" fill="none" stroke="#C98A3B" stroke-width="1.8" opacity="0.9"/>
+          <circle cx="72" cy="62" r="9" fill="none" stroke="#C98A3B" stroke-width="1.8" opacity="0.9"/>
+          <path d="M57 62 L63 62" stroke="#C98A3B" stroke-width="1.8" opacity="0.9"/>
+          <!-- nose -->
+          <path d="M60 66 Q58.6 70 60.4 71.5" stroke="#E0A876" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+          <!-- mouth -->
+          <path id="mouthSmile" d="M52 79 Q60 85 68 79" stroke="#8C4A2F" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+          <g id="mouthOpen">
+            <ellipse cx="60" cy="80.5" rx="6.4" ry="5" fill="#7A3B2E"/>
+            <ellipse cx="60" cy="83" rx="3.6" ry="2" fill="#E07868"/>
+          </g>
+        </g>
+      </svg>
+      <div class="ring"></div>
+    </div>
+    <div class="nm">Mia <span id="streak" class="streak" hidden>🔥0</span></div>
+    <div id="status" class="status">点 🎤 开始聊天</div>
+  </div>
+  <button id="btnSettings" class="iconbtn" title="设置">⚙️</button>
+</header>
+
+<main id="chat" aria-live="polite"></main>
+
+<section id="notes" class="open">
+  <button id="notesHead">
+    <span>📒 学习笔记 · 今天 <b id="notesCount">0</b> 条</span>
+    <span class="arr">▾</span>
+  </button>
+  <div id="notesChips" class="chips"></div>
+</section>
+
+<footer>
+  <div id="textRow" hidden>
+    <input id="txt" type="text" placeholder="也可以打字,中文提问也行…" autocomplete="off">
+    <button id="btnSend">发送</button>
+  </div>
+  <div class="bar">
+    <button id="btnKb" class="sidebtn" title="打字输入">⌨️</button>
+    <button id="btnMic" title="按一下说话"><span id="micIcon">🎤</span></button>
+    <button id="btnReplay" class="sidebtn" title="重听一遍">🔁</button>
+  </div>
+</footer>
+
+<!-- 首次设置 -->
+<div id="setup" class="overlay" hidden>
+  <div class="card">
+    <h2>👋 嗨,我是 Mia</h2>
+    <p class="sub">你的随身英语老师,随时可聊、没有时间限制。<br>只需一个免费的 Gemini API Key 就能开始。</p>
+    <label>Gemini API Key
+      <input id="suKey" type="password" placeholder="粘贴你的 API Key">
+    </label>
+    <p class="hint">没有 Key?去 <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> 用 Google 账号免费创建(无需绑卡)。Key 只保存在你手机本地,不会上传到任何服务器。</p>
+    <label>我的英语水平
+      <select id="suLevel">
+        <option>A2</option><option>B1</option><option selected>B2</option><option>C1</option>
+      </select>
+    </label>
+    <label>我感兴趣的话题(可选)
+      <input id="suInterests" type="text" placeholder="旅行、科技、电影、美食…">
+    </label>
+    <div class="row">
+      <button id="suTest" class="ghost">测试连接</button>
+      <span id="suTestMsg" class="testmsg"></span>
+    </div>
+    <button id="suStart" class="primary">开始学习 →</button>
+  </div>
+</div>
+
+<!-- 设置 -->
+<div id="settings" class="overlay" hidden>
+  <div class="card">
+    <div class="cardHead"><h2>设置</h2><button class="iconbtn" id="btnCloseSettings">✕</button></div>
+    <label>Gemini API Key
+      <input id="stKey" type="password" placeholder="粘贴你的 API Key">
+    </label>
+    <label>模型(免费额度用完可换)
+      <select id="stModel">
+        <option value="gemini-3.5-flash">gemini-3.5-flash(推荐)</option>
+        <option value="gemini-flash-latest">gemini-flash-latest</option>
+        <option value="gemini-flash-lite-latest">gemini-flash-lite-latest(额度最多)</option>
+        <option value="gemini-3-flash">gemini-3-flash</option>
+        <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+        <option value="custom">自定义…</option>
+      </select>
+    </label>
+    <label id="stCustomRow" hidden>自定义模型名
+      <input id="stCustom" type="text" placeholder="例如 gemini-3.5-flash">
+    </label>
+    <label>我的英语水平
+      <select id="stLevel"><option>A2</option><option>B1</option><option>B2</option><option>C1</option></select>
+    </label>
+    <label>感兴趣的话题
+      <input id="stInterests" type="text" placeholder="旅行、科技、电影…">
+    </label>
+    <label class="switch"><input type="checkbox" id="stAutoSpeak"> Mia 的回复自动朗读</label>
+    <label class="switch"><input type="checkbox" id="stHandsfree"> 免提连聊(她说完自动听你说,说完自动发送)</label>
+    <label>语速 <span id="stRateVal">1.0</span>
+      <input id="stRate" type="range" min="0.6" max="1.3" step="0.05">
+    </label>
+    <div class="row">
+      <button id="stTest" class="ghost">测试连接</button>
+      <span id="stTestMsg" class="testmsg"></span>
+    </div>
+    <button id="stSave" class="primary">保存</button>
+    <div class="row gap">
+      <button id="stExport" class="ghost">导出数据</button>
+      <button id="stImportBtn" class="ghost">导入数据</button>
+      <input id="stImport" type="file" accept="application/json" hidden>
+      <button id="stClear" class="ghost danger">清空数据</button>
+    </div>
+    <p class="hint">免费额度大约每分钟 10 句、每天 250–1500 句(随模型不同)。聊天数据和 Key 都只存在本机浏览器里。</p>
+  </div>
+</div>
+
+<!-- 学习记录 -->
+<div id="history" class="page" hidden>
+  <div class="pageHead">
+    <button id="btnCloseHistory" class="iconbtn">←</button>
+    <h2>学习记录</h2>
+  </div>
+  <div id="histList"></div>
+</div>
+
+<!-- 词条详情 -->
+<div id="sheet" class="sheetWrap" hidden>
+  <div class="sheetMask"></div>
+  <div class="sheetCard">
+    <div class="cardHead"><h3 id="shTerm">term</h3><button class="iconbtn" id="btnCloseSheet">✕</button></div>
+    <div><span id="shType" class="badge">word</span></div>
+    <p id="shZh" class="zh"></p>
+    <p id="shExample" class="ex"></p>
+    <button id="shSpeak" class="primary">🔊 读给我听</button>
+  </div>
+</div>
+
+<div id="toast" hidden></div>
+
+<noscript>需要启用 JavaScript 才能使用本应用。</noscript>
+<script src="./app.js"></script>
+</body>
+</html>

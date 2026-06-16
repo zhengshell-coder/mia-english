@@ -1,0 +1,16 @@
+{
+  "name": "Mia · 随时英语老师",
+  "short_name": "Mia",
+  "description": "随时陪你聊天的 AI 英语老师:语音对话、词汇语法笔记、每日学习记录",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F4EE",
+  "theme_color": "#2F6B5E",
+  "lang": "zh-CN",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
