@@ -65,9 +65,13 @@ const tts = {
     const pick = () => {
       const vs = (speechSynthesis.getVoices() || []);
       if (!vs.length) return;
-      const pref = ['Google US English', 'Samantha', 'Aria', 'Jenny', 'Ava', 'Allison', 'Karen', 'Daniel'];
+      // Prefer Premium/Enhanced voices — they sound dramatically more natural than standard
+      const pref = ['Ava (Premium)', 'Samantha (Premium)', 'Ava (Enhanced)', 'Samantha (Enhanced)',
+                    'Google US English', 'Aria (Online Natural)', 'Jenny (Online Natural)',
+                    'Aria', 'Jenny', 'Ava', 'Allison', 'Samantha', 'Karen', 'Daniel'];
       let v = null;
-      for (const p of pref) { v = vs.find(x => x.name && x.name.indexOf(p) >= 0 && x.lang.indexOf('en') === 0); if (v) break; }
+      for (const p of pref) { v = vs.find(x => x.name && x.name === p && x.lang.indexOf('en') === 0); if (v) break; }
+      if (!v) for (const p of pref) { v = vs.find(x => x.name && x.name.indexOf(p.split(' ')[0]) >= 0 && x.lang.indexOf('en') === 0); if (v) break; }
       if (!v) v = vs.find(x => /^en[-_](US|GB)/i.test(x.lang)) || vs.find(x => x.lang && x.lang.indexOf('en') === 0);
       this.voice = v || null;
     };
@@ -89,13 +93,21 @@ const tts = {
     this.onDone = onDone || null;
     const sp = this.speakable(text);
     if (!window.speechSynthesis || sp.length < 2) { this.finish(); return; }
-    const parts = sp.match(/[^.!?]+[.!?]*\s*/g) || [sp];
-    const chunks = []; let cur = '';
-    for (const p of parts) {
-      if ((cur + p).length > 180) { if (cur.trim()) chunks.push(cur); cur = p; }
-      else cur += p;
+    // Key fix: multiple utterances create robotic pauses between them.
+    // Only chunk very long texts; typical Mia replies (2-4 sentences) stay as one utterance.
+    let chunks;
+    if (sp.length <= 500) {
+      chunks = [sp];
+    } else {
+      const parts = sp.match(/[^.!?]+[.!?]+\s*/g) || [sp];
+      chunks = []; let cur = '';
+      for (const p of parts) {
+        if ((cur + p).length > 400) { if (cur.trim()) chunks.push(cur.trim()); cur = p; }
+        else cur += p;
+      }
+      if (cur.trim()) chunks.push(cur.trim());
+      if (!chunks.length) chunks = [sp];
     }
-    if (cur.trim()) chunks.push(cur);
     let i = 0;
     const next = () => {
       if (i >= chunks.length) { this.finish(); return; }
@@ -406,7 +418,7 @@ function normType(t) {
   if (t.indexOf('phr') >= 0 || t.indexOf('expr') >= 0 || t.indexOf('idiom') >= 0 || t.indexOf('coll') >= 0) return 'phrase';
   return 'word';
 }
-function chipEl(n) {
+function chipEl(n) {  // kept for history day-card rendering
   const b = document.createElement('button');
   b.className = 'chip';
   const dot = document.createElement('span');
@@ -416,18 +428,44 @@ function chipEl(n) {
   b.addEventListener('click', () => showSheet(n));
   return b;
 }
+function noteCardEl(n) {
+  const card = document.createElement('div');
+  card.className = 'noteCard';
+  card.addEventListener('click', () => showSheet(n));
+  const head = document.createElement('div');
+  head.className = 'noteCardHead';
+  const term = document.createElement('span');
+  term.className = 'noteTerm ' + n.type;
+  term.textContent = n.term;
+  const badge = document.createElement('span');
+  badge.className = 'noteBadge ' + n.type;
+  badge.textContent = {word:'单词', phrase:'短语', grammar:'语法'}[n.type] || n.type;
+  head.appendChild(term); head.appendChild(badge);
+  card.appendChild(head);
+  if (n.zh) { const d = document.createElement('div'); d.className = 'noteZh'; d.textContent = n.zh; card.appendChild(d); }
+  if (n.example) { const d = document.createElement('div'); d.className = 'noteEx'; d.textContent = '"' + n.example + '"'; card.appendChild(d); }
+  const btn = document.createElement('button');
+  btn.className = 'noteListenBtn'; btn.textContent = '🔊';
+  btn.addEventListener('click', e => { e.stopPropagation(); tts.unlock(); tts.speak(n.term + '. ' + (n.example || '')); });
+  card.appendChild(btn);
+  return card;
+}
 function renderNotesToday() {
   const t = day();
-  const wrap = $('#notesChips'); wrap.innerHTML = '';
-  if (!t.notes.length) {
-    const d = document.createElement('div');
-    d.className = 'empty';
-    d.textContent = '聊天中提到的词汇、表达和语法会自动记在这里,点一下可以看解释。';
-    wrap.appendChild(d);
-  } else {
-    for (let i = t.notes.length - 1; i >= 0; i--) wrap.appendChild(chipEl(t.notes[i]));
-  }
-  $('#notesCount').textContent = t.notes.length;
+  const vocab = t.notes.filter(n => n.type !== 'grammar');
+  const grammar = t.notes.filter(n => n.type === 'grammar');
+  const vPane = $('#paneVocab'); vPane.innerHTML = '';
+  if (!vocab.length) {
+    const d = document.createElement('div'); d.className = 'noteEmpty';
+    d.textContent = '聊天中提到的词汇和短语会自动记录在这里'; vPane.appendChild(d);
+  } else { for (let i = vocab.length - 1; i >= 0; i--) vPane.appendChild(noteCardEl(vocab[i])); }
+  const gPane = $('#paneGrammar'); gPane.innerHTML = '';
+  if (!grammar.length) {
+    const d = document.createElement('div'); d.className = 'noteEmpty';
+    d.textContent = '对话中出现的语法知识点会显示在这里'; gPane.appendChild(d);
+  } else { for (let i = grammar.length - 1; i >= 0; i--) gPane.appendChild(noteCardEl(grammar[i])); }
+  $('#notesCount').textContent = vocab.length || '';
+  $('#grammarCount').textContent = grammar.length || '';
 }
 function addNotes(arr) {
   if (!Array.isArray(arr)) return;
@@ -763,7 +801,22 @@ function bindUI() {
     toast('还没有可以重听的内容');
   });
 
-  $('#notesHead').addEventListener('click', () => $('#notes').classList.toggle('open'));
+  // tab panel
+  let panelOpen = true;
+  document.querySelectorAll('.tabBtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      if (tab === 'history') { renderHistory(); $('#history').hidden = false; return; }
+      document.querySelectorAll('.tabBtn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+      $('#paneVocab').hidden = tab !== 'vocab';
+      $('#paneGrammar').hidden = tab !== 'grammar';
+      if (!panelOpen) { panelOpen = true; $('#notePanel').classList.remove('collapsed'); }
+    });
+  });
+  $('#btnTogglePanel').addEventListener('click', () => {
+    panelOpen = !panelOpen;
+    $('#notePanel').classList.toggle('collapsed', !panelOpen);
+  });
 
   $('#btnSettings').addEventListener('click', openSettings);
   $('#btnCloseSettings').addEventListener('click', () => { $('#settings').hidden = true; });
@@ -783,7 +836,7 @@ function bindUI() {
     }
   });
 
-  $('#btnHistory').addEventListener('click', () => { renderHistory(); $('#history').hidden = false; });
+  // history opened via tab panel "记录" button
   $('#btnCloseHistory').addEventListener('click', () => { $('#history').hidden = true; });
 
   $('#btnCloseSheet').addEventListener('click', () => { $('#sheet').hidden = true; });

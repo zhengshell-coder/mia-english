@@ -80,29 +80,57 @@ body[data-state="speaking"] #mouthSmile{opacity:0;}
 .msg .fix .zhline{color:var(--muted); font-size:12.5px; margin-top:2px;}
 .sysline{align-self:center; font-size:12px; color:var(--muted); padding:2px 8px;}
 
-/* ---------- notes ---------- */
-#notes{
+/* ---------- note panel ---------- */
+#notePanel{
   border-top:1px solid var(--line); background:#FBF9F4;
   flex:0 0 auto; display:flex; flex-direction:column;
-  max-height:108px; transition:max-height .25s ease;
+  max-height:250px; transition:max-height .28s ease; overflow:hidden;
 }
-#notes.open{max-height:38dvh;}
-#notesHead{
-  display:flex; justify-content:space-between; align-items:center;
-  padding:10px 16px 6px; font-size:13.5px; color:var(--muted); width:100%; text-align:left;
+#notePanel.collapsed{max-height:46px;}
+.tabBar{
+  display:flex; align-items:stretch; min-height:46px; flex:0 0 46px;
+  border-bottom:1px solid var(--line); background:#FBF9F4;
 }
-#notesHead b{color:var(--green);}
-#notes.open .arr{transform:rotate(180deg);}
-.arr{transition:transform .25s;}
-.chips{
-  overflow-y:auto; padding:0 14px 12px;
-  display:flex; flex-wrap:wrap; gap:8px; align-content:flex-start;
+.tabBtn{
+  padding:0 13px; font-size:13px; color:var(--muted); flex:0 0 auto;
+  border-bottom:2.5px solid transparent; display:flex; align-items:center; gap:5px;
 }
+.tabBtn.active{color:var(--green); border-bottom-color:var(--green); font-weight:600;}
+.tabBtn b{font-size:11px; background:var(--green-soft); color:var(--green); border-radius:999px; padding:1px 6px; font-weight:700;}
+.tabBtn.hist{margin-left:auto;}
+.tabToggle{padding:0 14px; font-size:14px; color:var(--muted); transition:transform .28s; display:flex; align-items:center;}
+#notePanel.collapsed .tabToggle{transform:rotate(180deg);}
+#noteContent{flex:1; overflow-y:auto; min-height:0;}
+.tabPane{padding:10px 14px 14px;}
+/* vocabulary cards */
+.noteCard{
+  background:var(--card); border:1px solid var(--line); border-radius:14px;
+  padding:12px 44px 12px 14px; margin-bottom:8px; position:relative; cursor:pointer;
+}
+.noteCard:active{background:#f7f5f0;}
+.noteCardHead{display:flex; align-items:center; gap:7px; margin-bottom:3px;}
+.noteTerm{font-size:16px; font-weight:700;}
+.noteTerm.word{color:var(--green);}
+.noteTerm.phrase{color:#C8850A;}
+.noteTerm.grammar{color:#7B6CC2;}
+.noteBadge{font-size:11px; padding:2px 7px; border-radius:999px; font-weight:500;}
+.noteBadge.word{background:var(--green-soft); color:var(--green);}
+.noteBadge.phrase{background:var(--amber-soft); color:#9A6800;}
+.noteBadge.grammar{background:#EDE9FA; color:#7B6CC2;}
+.noteZh{font-size:13.5px; color:var(--ink); margin-bottom:2px;}
+.noteEx{font-size:12.5px; color:var(--muted); font-style:italic;}
+.noteListenBtn{
+  position:absolute; top:50%; right:10px; transform:translateY(-50%);
+  font-size:19px; padding:6px; opacity:.65;
+}
+.noteListenBtn:active{opacity:1;}
+.noteEmpty{font-size:13px; color:var(--muted); padding:20px 4px; text-align:center; line-height:1.7;}
+/* keep chip styles for history day cards */
+.chips{display:flex; flex-wrap:wrap; gap:8px; padding:8px 0 0;}
 .chip{
   background:var(--card); border:1px solid var(--line); border-radius:999px;
-  padding:6px 12px; font-size:13.5px; display:inline-flex; align-items:center; gap:6px;
+  padding:5px 11px; font-size:13px; display:inline-flex; align-items:center; gap:5px;
 }
-.chip:active{background:var(--green-soft);}
 .dot{width:7px; height:7px; border-radius:50%; flex:0 0 auto;}
 .dot.word{background:var(--green);}
 .dot.phrase{background:var(--amber);}

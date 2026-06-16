@@ -17,7 +17,7 @@
 <body data-state="idle">
 
 <header id="topbar">
-  <button id="btnHistory" class="iconbtn" title="学习记录">📅</button>
+  <div style="width:44px"></div>
   <div class="who">
     <div class="avatarWrap">
       <svg id="avatar" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-label="Mia">
@@ -77,12 +77,17 @@
 
 <main id="chat" aria-live="polite"></main>
 
-<section id="notes" class="open">
-  <button id="notesHead">
-    <span>📒 学习笔记 · 今天 <b id="notesCount">0</b> 条</span>
-    <span class="arr">▾</span>
-  </button>
-  <div id="notesChips" class="chips"></div>
+<section id="notePanel">
+  <div class="tabBar">
+    <button class="tabBtn active" data-tab="vocab">词汇 <b id="notesCount">0</b></button>
+    <button class="tabBtn" data-tab="grammar">语法 <b id="grammarCount"></b></button>
+    <button class="tabBtn hist" data-tab="history">📅 记录</button>
+    <button id="btnTogglePanel" class="tabToggle">▾</button>
+  </div>
+  <div id="noteContent">
+    <div id="paneVocab" class="tabPane"></div>
+    <div id="paneGrammar" class="tabPane" hidden></div>
+  </div>
 </section>
 
 <footer>
